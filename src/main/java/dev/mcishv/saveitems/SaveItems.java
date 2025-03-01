@@ -30,12 +30,12 @@ public class SaveItems extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         List<ItemStack> items = new ArrayList<>();
-        event.getDrops().removeIf(SaveItems::isToolWeaponOrArmor);
         for (ItemStack item : event.getDrops()) {
             if (item.getType() != Material.AIR && isToolWeaponOrArmor(item)) {
                 items.add(item);
             }
         }
+        event.getDrops().removeIf(SaveItems::isToolWeaponOrArmor);
         savedItems.put(event.getPlayer(), items);
     }
 
