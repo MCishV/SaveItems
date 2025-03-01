@@ -1,15 +1,20 @@
 package dev.mcishv.saveitems;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Set;
+import java.util.*;
 
 public class SaveItems extends JavaPlugin implements Listener {
+    private final Map<Player, List<ItemStack>> savedItems = new HashMap<>();
+
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
@@ -24,7 +29,28 @@ public class SaveItems extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
+        List<ItemStack> items = new ArrayList<>();
         event.getDrops().removeIf(SaveItems::isToolWeaponOrArmor);
+        for (ItemStack item : event.getDrops()) {
+            if (item.getType() != Material.AIR && isToolWeaponOrArmor(item)) {
+                items.add(item);
+            }
+        }
+        savedItems.put(event.getPlayer(), items);
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        List<ItemStack> items = savedItems.get(player);
+        if (!savedItems.isEmpty()) {
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+                for (ItemStack item : items) {
+                    player.getInventory().addItem(item);
+                }
+                savedItems.remove(player);
+            }, 1L);
+        }
     }
 
     private static final Set<Material> ALLOWED_ITEMS = Set.of(
