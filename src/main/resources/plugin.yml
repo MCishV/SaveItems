@@ -1,0 +1,8 @@
+name: "SaveInstruments"
+version: "1.0-RELEASE"
+main: "dev.mcishv.saveitems.SaveItems"
+api-version: '1.20'
+author: "MCishV"
+prefix: "SI"
+description: "A plugin thats save your tools when you die"
+load: POSTWORLD
