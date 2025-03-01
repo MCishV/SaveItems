@@ -1,5 +1,5 @@
-name: "SaveInstruments"
-version: "1.0-RELEASE"
+name: "SaveItems"
+version: "1.0"
 main: "dev.mcishv.saveitems.SaveItems"
 api-version: '1.20'
 author: "MCishV"

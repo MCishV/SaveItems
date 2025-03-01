@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.mcishv.saveitems"
-version = "1.0-RELEASE"
+version = "1.0"
 
 repositories {
     maven {
