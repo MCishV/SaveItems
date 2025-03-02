@@ -1,77 +1,19 @@
 package dev.mcishv.saveitems;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import dev.mcishv.saveitems.events.PlayerDeathListener;
+import dev.mcishv.saveitems.events.PlayerRespawnListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
-
-public class SaveItems extends JavaPlugin implements Listener {
-    private final Map<Player, List<ItemStack>> savedItems = new HashMap<>();
-
+public class SaveItems extends JavaPlugin {
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(this, this);
-        getLogger().info("Author: " + String.join(", ", getDescription().getAuthors()));
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this), this);
         getLogger().info("SaveItems enabled!");
     }
 
     @Override
     public void onDisable() {
         getLogger().info("SaveItems disabled!");
-    }
-
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        List<ItemStack> items = new ArrayList<>();
-        for (ItemStack item : event.getDrops()) {
-            if (item.getType() != Material.AIR && isToolWeaponOrArmor(item)) {
-                items.add(item);
-            }
-        }
-        event.getDrops().removeIf(SaveItems::isToolWeaponOrArmor);
-        savedItems.put(event.getPlayer(), items);
-    }
-
-    @EventHandler
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
-        List<ItemStack> items = savedItems.get(player);
-        if (!savedItems.isEmpty()) {
-            Bukkit.getScheduler().runTaskLater(this, () -> {
-                for (ItemStack item : items) {
-                    player.getInventory().addItem(item);
-                }
-                savedItems.remove(player);
-            }, 1L);
-        }
-    }
-
-    private static final Set<Material> ALLOWED_ITEMS = Set.of(
-            Material.WOODEN_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.GOLDEN_PICKAXE, Material.DIAMOND_PICKAXE, Material.NETHERITE_PICKAXE,
-            Material.WOODEN_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.GOLDEN_AXE, Material.DIAMOND_AXE, Material.NETHERITE_AXE,
-            Material.WOODEN_SHOVEL, Material.STONE_SHOVEL, Material.IRON_SHOVEL, Material.GOLDEN_SHOVEL, Material.DIAMOND_SHOVEL, Material.NETHERITE_SHOVEL,
-            Material.WOODEN_HOE, Material.STONE_HOE, Material.IRON_HOE, Material.GOLDEN_HOE, Material.DIAMOND_HOE, Material.NETHERITE_HOE,
-            Material.SHEARS,
-            Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD,
-            Material.BOW, Material.CROSSBOW, Material.TRIDENT,
-            Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS,
-            Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
-            Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
-            Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS,
-            Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS,
-            Material.TURTLE_HELMET, Material.SHIELD
-    );
-    public static boolean isToolWeaponOrArmor(ItemStack itemStack) {
-        if (itemStack == null || itemStack.getType() == Material.AIR) {
-            return false;
-        }
-        return ALLOWED_ITEMS.contains(itemStack.getType());
     }
 }
