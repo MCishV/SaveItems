@@ -3,6 +3,7 @@ package dev.mcishv.saveitems.events;
 import dev.mcishv.saveitems.SaveItems;
 import dev.mcishv.saveitems.utils.InventoryCache;
 import dev.mcishv.saveitems.utils.ItemUtils;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,8 +24,14 @@ public class PlayerDeathListener implements Listener {
         Player player = event.getEntity();
         List<ItemStack> items = ItemUtils.getItemsToSave(event);
         ItemStack[] armor = player.getInventory().getArmorContents();
+        ItemStack[] offHand;
+        if (ItemUtils.isToolWeaponOrArmor(player.getInventory().getItemInOffHand())) {
+            offHand = new ItemStack[]{player.getInventory().getItemInOffHand()};
+        } else {
+            offHand = null;
+        }
 
-        InventoryCache.saveItems(player, items, armor);
+        InventoryCache.saveItems(player, items, armor, offHand);
 
         event.getDrops().removeIf(ItemUtils::isToolWeaponOrArmor);
     }
